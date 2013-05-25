@@ -16,13 +16,22 @@ def loadRTree():
                                 vector.append(struct.unpack('@d',f.read(8))[0])
                         #insertar el nuevo vector en el arbol
                         #print vector
-                        rtree.insertar(rtree,vector)
+                        
+                        rtree.insertar(rtree.chooseLeaf(rtree,vector),vector)
+        print rtree.printRTree()
+        vector=[]
+        vector.append(0.1234)
+        vector.append(0.2345)
+        vector.append(0.3456)
+        rtree.insertar(rtree.chooseLeaf(rtree,vector),vector)
+        print rtree.printRTree()
+        """
         if rtree.childs is []:
                 print "fail"
         else:
                 for child in rtree.childs:
                         print child
-
+        """
 
 #Insercion
 #Si nodo es hoja reviso si tiene espacio, de ser asi, inserto
