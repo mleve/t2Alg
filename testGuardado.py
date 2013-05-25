@@ -1,9 +1,9 @@
 import struct
 import random
 
-dimension = random.randint(2,20)
+dimension = 3
 print dimension
-n = random.randint(1,10)
+n = 50
 print n
 
 values = []
@@ -12,7 +12,7 @@ for i in range(dimension*n):
 
 print values
 
-with open('test4.bin', 'wb') as f:
+with open('test3D.bin', 'wb') as f:
     f.write(struct.pack('@ii', dimension, n))
     for value in values:
         f.write(struct.pack('@d', value))

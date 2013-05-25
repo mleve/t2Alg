@@ -1,22 +1,29 @@
 import RTree
+import GeneradorDePuntos
+import struct
+def loadRTree():
+        with open('test3D.bin','rb') as f:
+                #Obtener Dimension y numero de vertices
+                metadata = struct.unpack('@ii',f.read(8))
+                dimension = metadata[0]
+                points = metadata[1]
+                #Inicializar arbol
+                rtree = RTree.RTree(dimension)
+                for i in range(points):
+                #Obtener proximo punto (vector) a insertar
+                        vector = []
+                        for j in range(dimension):
+                                vector.append(struct.unpack('@d',f.read(8))[0])
+                        #insertar el nuevo vector en el arbol
+                        #print vector
+                        rtree.insertar(rtree,vector)
+        if rtree.childs is []:
+                print "fail"
+        else:
+                for child in rtree.childs:
+                        print child
 
-def loadRTree:
-	with open('test4.bin','rb') as f:
-#Obtener Dimension y numero de vertices
-		metadata = struct.unpack('@ii,f.read(8))
-		dimension = metadata[0]
-		points = metadata[1]
-#Inicializar arbol
-		rtree = RTree(dimension)
-		for i in range(n):
-#Obtener proximo punto (vector) a insertar
-			vector = []
-			for j in range(dimension):
-				vector.append(struct.unpack('@d',f.read(8)))
-#insertar el nuevo vector en el arbol
-		insertar(rtree,vector)
 
-def insert(node,vector)
 #Insercion
 #Si nodo es hoja reviso si tiene espacio, de ser asi, inserto
 	
@@ -27,9 +34,8 @@ def insert(node,vector)
 
 
 #armar arbol
-	
 
 
-
+loadRTree()
 
 
