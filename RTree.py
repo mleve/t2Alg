@@ -1,7 +1,7 @@
 import random
 class RTree:
 	def __init__(self, dimension):
-                self.dim = dimension
+		self.dim = dimension
 		self.isLeaf=1
 		self.childCount=0
 		self.parent=None
@@ -42,9 +42,13 @@ class RTree:
                                 return node.chooseLeaf(node.childs[0][1],point)
         
 	def insertar(self,node,point):
-		node.childs.append(((point,point),point))
-		node.calcRectangle(node,point)
+		node.childs.append(((point, point), point))
 		node.childCount+=1
+		node.calcRectangle(node,point)
+		aux = node.parent
+		while aux is not None:
+                        node.dirRectangle(aux)
+                        aux = aux.parent
 		if(node.isFull()):
 			node.split(node)
 
@@ -52,7 +56,7 @@ class RTree:
                 
 
         def split(self,node):
-                print "estoy spliteando"
+                #print "estoy spliteando"
                 newNode1 = RTree(node.dim)
                 newNode2 = RTree(node.dim)
                 if(node.isLeaf==0):
@@ -71,15 +75,15 @@ class RTree:
                                 newNode2.childCount+=1
                                 newNode2.childs.append(node.childs[i])
                 if(node.isLeaf==0):
-                        for i in range (0, newNode1.childCount):
+                        for i in range (newNode1.childCount):
                                 newNode1.childs[i][1].parent = newNode1
-                        for i in range (0, newNode2.childCount):
+                        for i in range (newNode2.childCount):
                                 newNode2.childs[i][1].parent = newNode2
-                        pointsRectangle(newNode1)
-                        pointsRectangle(newNode2)
+                        node.dirRectangle(newNode1)
+                        node.dirRectangle(newNode2)
                 else:
-                        newNode1.dirRectangle(newNode1)
-                        newNode2.dirRectangle(newNode2)
+                        newNode1.pointsRectangle(newNode1)
+                        newNode2.pointsRectangle(newNode2)
                 if(node.parent==None):
                         newNode1.parent = node
                         newNode2.parent = node
@@ -92,13 +96,16 @@ class RTree:
                 else:
                         newNode1.parent = node.parent
                         newNode2.parent = node.parent
-                        print node.parent.childs
-                        print node
-                        print node.rectangle
-                        node.parent.childs.remove((node.rectangle,node))
+                        #print node.parent.childs
+                        #print node
+                        #print node.rectangle
                         node.parent.childs.append((newNode1.rectangle,newNode1))
                         node.parent.childs.append((newNode2.rectangle,newNode2))
                         node.parent.childCount+=1
+                        node.parent.childs = [child for child in node.parent.childs if child[1] is not node]
+                        #node.parent.childs.remove(x for x in node.parent.childs if x[1] is node)
+                        #node.parent.childs.remove((node.rectangle,node))
+                        #print node.parent.childs
                         node.dirRectangle(node.parent)
 
         def calcRectangle(self,node,point):
@@ -139,9 +146,9 @@ class RTree:
                                         maxVals[k] = maxs[j][k]
                 
                 node.rectangle = (minVals,maxVals)
-                print "rec cubridor:"
-                print node.rectangle
-                print "endRec"
+                #print "rec cubridor:"
+                #print node.rectangle
+                #print "endRec"
                                 
                                 
                                 

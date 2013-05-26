@@ -46,6 +46,6 @@ def loadRTree():
 
 #armar arbol
 
-
+#GeneradorDePuntos.generar(2, 10)
 loadRTree()
 
