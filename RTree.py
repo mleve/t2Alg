@@ -1,4 +1,5 @@
 import random
+import math
 class RTree:
 	def __init__(self, dimension):
 		self.dim = dimension
@@ -43,7 +44,7 @@ class RTree:
                                 #return node.chooseLeaf(node.childs[0][1],point)
                                 diffs = []
                                 for child in node.childs:
-                                        diffs.append(calcVolumeEnlargement(node, child[0], (point, point)))
+                                        diffs.append(node.calcVolumeEnlargement(node, child[0], (point, point)))
                                 min_diff = min(diffs)
                                 min_diff_indexes = []
                                 for i in range(len(diffs)):
@@ -52,7 +53,7 @@ class RTree:
                                 if len(min_diff_indexes)>1:
                                         volumes = []
                                         for index in min_diff_indexes:
-                                                volumes.append(calcVolume(node, node.childs[index][0]))
+                                                volumes.append(node.calcVolume(node, node.childs[index][0]))
                                         selected_index = min_diff_indexes[volumes.index(min(volumes))]
                                         return node.chooseLeaf(node.childs[selected_index][1], point)
                                 else:
@@ -61,9 +62,20 @@ class RTree:
 
         def calcVolume(self, node, rectangle):
                 #Asumimos por implementacion que rectangle viene en la forma [(min1,...,mind), (max1,...,maxd)]
-                diffs = []
+                """print "en calcVolume con rectangle..."
+                print rectangle"""
+                diffs = [0]*node.dim
                 result = 1
                 for i in range(node.dim):
+                        """print "vamos a calcular diffs[i]!"
+                        print "rectangle[1] es:"
+                        print rectangle[1]
+                        print "rectangle[0] es:"
+                        print rectangle[0]
+                        print "i es:"
+                        print i
+                        print "rectangle[1][i]:"
+                        print rectangle[1][i]"""
                         diffs[i] = rectangle[1][i]-rectangle[0][i]
                         result *= diffs[i]
                 return result
@@ -81,20 +93,33 @@ class RTree:
                         if (rectangle2[1][i] > maxs[i]):
                                 maxs[i] = rectangle2[1][i]
                 boundingRectangle = [mins, maxs]
-                return calcVolume(node, boundingRectangle) - calcVolume(node, rectangle1) - calcVolume(node, rectangle2)
+                """print "en calcVolumeInefficiency: rectangle 1 y rectangle2 son..."
+                print rectangle1
+                print rectangle2
+                print "llamando calcVolume con boundingRectangle..."
+                print boundingRectangle"""
+                return node.calcVolume(node, boundingRectangle) - node.calcVolume(node, rectangle1) - node.calcVolume(node, rectangle2)
 
         def calcVolumeEnlargement(self, node, targetRectangle, newRectangle):
                 mins = targetRectangle[0]
                 maxs = targetRectangle[1]
+                """print "en calcVolumeEnlargement:"
+                print "targetRectangle:"
+                print targetRectangle
+                print "newRectangle:"
+                print newRectangle"""
                 for i in range(node.dim):
                         if (newRectangle[0][i] < mins[i]):
                                 mins[i] = newRectangle[0][i]
                         if (newRectangle[1][i] > maxs[i]):
                                 maxs[i] = newRectangle[1][i]
+                #print "enlargedRectangle:"
                 enlargedRectangle = [mins, maxs]
-                return calcVolume(node, enlargedRectangle) - calcVolume(node, targetRectangle)
+                #print enlargedRectangle
+                return node.calcVolume(node, enlargedRectangle) - node.calcVolume(node, targetRectangle)
         
 	def insertar(self,node,point):
+                print point
 		node.childs.append(((point, point), point))
 		node.childCount+=1
 		node.calcRectangle(node,point)
@@ -115,7 +140,7 @@ class RTree:
                 if(node.isLeaf==0):
                         newNode1.isLeaf=0
                         newNode2.isLeaf=0
-                newNode1.childs.append(node.childs[0])
+                """newNode1.childs.append(node.childs[0])
                 newNode1.childCount+=1
                 newNode2.childs.append(node.childs[1])
                 newNode2.childCount+=1
@@ -127,6 +152,148 @@ class RTree:
                         else:
                                 newNode2.childCount+=1
                                 newNode2.childs.append(node.childs[i])
+                """
+                rectangle_list = [child[0] for child in node.childs]
+                #print "en split: rectangle_list es..."
+                #print rectangle_list
+                #non_added_indexes = range(node.childCount)
+                #print "llamando pickSeeds"
+                """print "non_added_indexes inicial:"
+                print non_added_indexes
+                """
+                seeds = node.pickSeeds(node, rectangle_list)
+                print "seeds:"
+                print seeds
+                newNode2.childs.append(node.childs[seeds[1]])
+                newNode2.childCount+=1
+                #non_added_indexes.remove(seeds[1])
+                """print "non_added_indexes luego de remover seeds[1]:"
+                print non_added_indexes
+                """
+                print "rectangle_list:"
+                print rectangle_list
+                print "rectangle_list[seeds[1]]"
+                print rectangle_list[seeds[1]]
+                del rectangle_list[seeds[1]]
+                print "rectangle_list luego de remover rectangle_list[seeds[1]]:"
+                print rectangle_list
+                newNode1.childs.append(node.childs[seeds[0]])
+                newNode1.childCount+=1
+                """print "non_added_indexes es:"
+                print non_added_indexes
+                print "seeds es:"
+                print seeds
+                print "rectangle_list es:"
+                print rectangle_list
+                print "largo de rectangle_list es:"
+                print len(rectangle_list)"""
+                #non_added_indexes.remove(seeds[0])
+                print "rectangle_list[seeds[0]]"
+                print rectangle_list[seeds[0]]
+                del rectangle_list[seeds[0]]
+                print "rectangle_list luego de remover rectangle_list[seeds[0]]:"
+                print rectangle_list
+                
+                if(node.isLeaf==0):
+                        node.dirRectangle(newNode1)
+                        node.dirRectangle(newNode2)
+                else:
+                        node.pointsRectangle(newNode1)
+                        node.pointsRectangle(newNode2)
+
+                newNode1Tom = node.m-newNode1.childCount
+                newNode2Tom = node.m-newNode2.childCount
+                print "newNode1 childs, rectangle:"
+                print newNode1.childs
+                print newNode1.rectangle
+                print "newNode2 childs, rectangle:
+                print newNode2.childs
+                print newNode2.rectangle
+                while rectangle_list:
+                        if (not (len(rectangle_list)==newNode1Tom or len(rectangle_list)==newNode2Tom)):
+                                selected_index = node.pickNext(node, rectangle_list, newNode1.rectangle, newNode2.rectangle)
+                                newNode1Enlargement = node.calcVolumeEnlargement(node, newNode1.rectangle, rectangle_list[selected_index])
+                                newNode2Enlargement = node.calcVolumeEnlargement(node, newNode2.rectangle, rectangle_list[selected_index])
+                                print "selected_index:"
+                                print selected_index
+                                """
+                                print "non_added_indexes:"
+                                print non_added_indexes
+                                non_added_indexes.remove(selected_index)"""
+                                del rectangle_list[selected_index]
+                                if (newNode1Enlargement < newNode2Enlargement):
+                                        newNode1.childs.append(node.childs[selected_index])
+                                        newNode1.childCount+=1
+                                        newNode1Tom = node.m-newNode1.childCount
+                                        if(node.isLeaf==0):
+                                                node.dirRectangle(newNode1)
+                                        else:
+                                                node.pointsRectangle(newNode1)
+                                elif (newNode1Enlargement > newNode2Enlargement):
+                                        newNode2.childs.append(node.childs[selected_index])
+                                        newNode2.childCount+=1
+                                        newNode2Tom = node.m-newNode2.childCount
+                                        if(node.isLeaf==0):
+                                                node.dirRectangle(newNode2)
+                                        else:
+                                                node.pointsRectangle(newNode2)
+                                else:
+                                        newNode1Volume = node.calcVolume(node, newNode1.rectangle)
+                                        newNode2Volume = node.calcVolume(node, newNode2.rectangle)
+                                        if(newNode1Volume < newNode2Volume):
+                                                newNode1.childs.append(node.childs[selected_index])
+                                                newNode1.childCount+=1
+                                                newNode1Tom = node.m-newNode1.childCount
+                                                if(node.isLeaf==0):
+                                                        node.dirRectangle(newNode1)
+                                                else:
+                                                        node.pointsRectangle(newNode1)
+                                        elif (newNode1Volume > newNode2Volume):
+                                                newNode2.childs.append(node.childs[selected_index])
+                                                newNode2.childCount+=1
+                                                newNode2Tom = node.m-newNode2.childCount
+                                                if(node.isLeaf==0):
+                                                        node.dirRectangle(newNode2)
+                                                else:
+                                                        node.pointsRectangle(newNode2)
+                                        else:
+                                                if(newNode1.childCount < newNode2.childCount):
+                                                        newNode1.childs.append(node.childs[selected_index])
+                                                        newNode1.childCount+=1
+                                                        newNode1Tom = node.m-newNode1.childCount
+                                                        if(node.isLeaf==0):
+                                                                node.dirRectangle(newNode1)
+                                                        else:
+                                                                node.pointsRectangle(newNode1)
+                                                else:
+                                                        newNode2.childs.append(node.childs[selected_index])
+                                                        newNode2.childCount+=1
+                                                        newNode2Tom = node.m-newNode2.childCount
+                                                        if(node.isLeaf==0):
+                                                                node.dirRectangle(newNode2)
+                                                        else:
+                                                                node.pointsRectangle(newNode2)
+                        elif len(rectangle_list)==newNode1Tom:
+                                newNode1.childs.append(node.childs[0])
+                                newNode1.childCount+=1
+                                newNode1Tom = node.m-newNode1.childCount
+                                if(node.isLeaf==0):
+                                        node.dirRectangle(newNode1)
+                                else:
+                                        node.pointsRectangle(newNode1)
+                        else:
+                                newNode2.childs.append(node.childs[0])
+                                newNode2.childCount+=1
+                                newNode2Tom = node.m-newNode2.childCount
+                                if(node.isLeaf==0):
+                                        node.dirRectangle(newNode2)
+                                else:
+                                        node.pointsRectangle(newNode2)
+                                
+                        
+                        
+                #end while :P
+                
                 if(node.isLeaf==0):
                         for i in range (newNode1.childCount):
                                 newNode1.childs[i][1].parent = newNode1
@@ -166,11 +333,16 @@ class RTree:
                 worstI = -1
                 worstJ = -1
                 worstD = -1
+                """print "en pickSeeds: rectangles es..."
+                print rectangles"""
                 for i in range(len(rectangles)):
                         for j in range(i, len(rectangles)):
                                 if (i != j):
-                                        diff = calcVolumeInefficiency(node, rectangles[i], rectangles[j])
-                                        if diff > d:
+                                        """print "llamando calcVolumeInefficiency con rectangles[i], rectangles[j].."
+                                        print rectangles[i]
+                                        print rectangles[j]"""
+                                        diff = node.calcVolumeInefficiency(node, rectangles[i], rectangles[j])
+                                        if diff > worstD:
                                                 worstI = i
                                                 worstJ = j
                                                 worstD = diff
@@ -178,10 +350,26 @@ class RTree:
 
         def pickNext(self, node, rectangles, targetRect1, targetRect2):
                 #targetRect1 y 2 son los MBR de los grupos 1 y 2
+                print "Estoy en pickNext. rectangles:"
+                print rectangles
+                print "targetRect1:"
+                print targetRect1
+                print "targetRect2:"
+                print targetRect2
                 diffs = []
+                max_diff = -1.0
                 for rectangle in rectangles:
-                        diffs.append(abs(calcVolumeEnlargement(node, targetRect1, rectangle) - calcVolumeEnlargement(node, targetRect2, rectangle)))
-                return rectangles.index(max(diffs))
+                        print "rectangle:"
+                        print rectangle
+                        diff = math.fabs(node.calcVolumeEnlargement(node, targetRect1, rectangle) - node.calcVolumeEnlargement(node, targetRect2, rectangle))
+                        print "diff:"
+                        print diff
+                        diffs.append(diff)
+                        if diff > max_diff:
+                                max_diff = diff
+                print "diffs:"
+                print diffs
+                return rectangles.index(rectangles[diffs.index(max_diff)])
 
         def calcRectangle(self,node,point):
                 #Si es hoja, rectangulo de puntos
