@@ -194,6 +194,7 @@ class RTree:
                 """print "rectangle_list[seeds[1]]"
                 print rectangle_list[seeds[1]]"""
                 del rectangle_list[seeds[1]]
+                del children[seeds[1]]
                 """print "rectangle_list luego de remover rectangle_list[seeds[1]]:"
                 print rectangle_list"""
                 newNode1.childs.append(node.childs[seeds[0]])
@@ -210,6 +211,7 @@ class RTree:
                 """print "rectangle_list[seeds[0]]"
                 print rectangle_list[seeds[0]]"""
                 del rectangle_list[seeds[0]]
+                del children[seeds[0]]
                 print "rectangle_list luego de remover rectangle_list[seeds[0]]:"
                 print rectangle_list
                 
