@@ -2,7 +2,7 @@ import RTree
 import GeneradorDePuntos
 import struct
 def loadRTree():
-        with open('test3D.bin','rb') as f:
+        with open('data2D.bin','rb') as f:
                 #Obtener Dimension y numero de vertices
                 metadata = struct.unpack('@ii',f.read(8))
                 dimension = metadata[0]
@@ -19,12 +19,14 @@ def loadRTree():
                         
                         rtree.insertar(rtree.chooseLeaf(rtree,vector),vector)
         print rtree.printRTree()
+        """
         vector=[]
         vector.append(0.1234)
         vector.append(0.2345)
         vector.append(0.3456)
         rtree.insertar(rtree.chooseLeaf(rtree,vector),vector)
-        print rtree.printRTree()
+        """
+        #print rtree.printRTree()
         """
         if rtree.childs is []:
                 print "fail"
@@ -46,5 +48,4 @@ def loadRTree():
 
 
 loadRTree()
-
 
