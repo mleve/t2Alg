@@ -38,15 +38,21 @@ class RTree:
 
         def RangeQuery(self,point, radio, node):
                 res = []
+                accesos=0
+                
                 if(node.isLeaf==1):
                         for child in node.childs:
                               if(node.vectorDist(point,child[1])<= radio):
                                       res.append(child[1])
+                                      accesos+=1
                 else:
                         for child in node.childs:
                                 if(node.minDist(point,child[0]) <= radio):
-                                        res = res + node.RangeQuery(point,radio,child[1])
-                return res
+                                        aux = node.RangeQuery(point,radio,child[1])
+                                        res = res + aux[0]
+                                        accesos = accesos + aux[1] + 1
+                                        
+                return (res,accesos)
                 
         def vectorDist(self,p1,p2):
                 res=0
