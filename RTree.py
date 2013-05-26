@@ -40,7 +40,24 @@ class RTree:
 			else:
 				#childDir=chooseChild(node,point)
 				#return chooseLeaf(loadNode(childDir),point)
-                                return node.chooseLeaf(node.childs[0][1],point)
+                                #return node.chooseLeaf(node.childs[0][1],point)
+                                diffs = []
+                                for child in node.childs:
+                                        diffs.append(calcVolumeEnlargement(node, child[0], (point, point)))
+                                min_diff = min(diffs)
+                                min_diff_indexes = []
+                                for i in range(len(diffs)):
+                                        if diffs[i] == min_diff:
+                                                min_diff_indexes.append(i)
+                                if len(min_diff_indexes)>1:
+                                        volumes = []
+                                        for index in min_diff_indexes:
+                                                volumes.append(calcVolume(node, node.childs[index][0]))
+                                        selected_index = min_diff_indexes[volumes.index(min(volumes))]
+                                        return node.chooseLeaf(node.childs[selected_index][1], point)
+                                else:
+                                        return node.chooseLeaf(node.childs[min_diff_indexes[0]][1], point)
+                                                     
 
         def calcVolume(self, node, rectangle):
                 #Asumimos por implementacion que rectangle viene en la forma [(min1,...,mind), (max1,...,maxd)]
