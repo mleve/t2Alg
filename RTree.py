@@ -144,6 +144,28 @@ class RTree:
                         #print node.parent.childs
                         node.dirRectangle(node.parent)
 
+        def pickSeeds(self, node, rectangles):
+                #rectangles es lista de rectangulos, los cuales vienen en forma [(min1,...,mind), (max1,...,maxd)]
+                worstI = -1
+                worstJ = -1
+                worstD = -1
+                for i in range(len(rectangles)):
+                        for j in range(i, len(rectangles)):
+                                if (i != j):
+                                        diff = calcVolumeInefficiency(node, rectangles[i], rectangles[j])
+                                        if diff > d:
+                                                worstI = i
+                                                worstJ = j
+                                                worstD = diff
+                return [worstI, worstJ]
+
+        def pickNext(self, node, rectangles, targetRect1, targetRect2):
+                #targetRect1 y 2 son los MBR de los grupos 1 y 2
+                diffs = []
+                for rectangle in rectangles:
+                        diffs.append(abs(calcVolumeEnlargement(node, targetRect1, rectangle) - calcVolumeEnlargement(node, targetRect2, rectangle)))
+                return rectangles.index(max(diffs))
+
         def calcRectangle(self,node,point):
                 #Si es hoja, rectangulo de puntos
                 if(node.isLeaf==1):
