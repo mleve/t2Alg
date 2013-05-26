@@ -27,6 +27,52 @@ class RTree:
                                 print child[1].printRTree()
                 return printarray
 
+        def getPoints(self, node):
+                points = []
+                if(node.isLeaf == 1):
+                        for child in node.childs:
+                                points.append(child[1])
+                else:
+                        for child in node.childs:
+                                points = points + node.getPoints(child[1])
+                return points
+
+        def RangeQuery(self,point, radio, node):
+                res = []
+                accesos=0
+                
+                if(node.isLeaf==1):
+                        for child in node.childs:
+                              if(node.vectorDist(point,child[1])<= radio):
+                                      res.append(child[1])
+                                      accesos+=1
+                else:
+                        for child in node.childs:
+                                if(node.minDist(point,child[0]) <= radio):
+                                        aux = node.RangeQuery(point,radio,child[1])
+                                        res = res + aux[0]
+                                        accesos = accesos + aux[1] + 1
+                                        
+                return (res,accesos)
+                
+        def vectorDist(self,p1,p2):
+                res=0
+                for i in range(len(p1)):
+                     res=res + ((p1[i]-p2[i])*(p1[i]-p2[i]))
+                return math.sqrt(res)
+
+        def  minDist(self,point,rectangle):
+                res=0
+                for i in range(len(point)):
+                        if(point[i]<= rectangle[0][i]):
+                                res = res + (rectangle[0][i]-point[i])**2
+                        elif (point[i]>= rectangle[1][i]):
+                                res = res+ (point[i]-rectangle[1][i])**2
+                return res
+                                
+                
+                
+
 	def chooseLeaf(self, node, point):
 		if(node.isLeaf==1):
 			return node
