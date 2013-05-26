@@ -7,7 +7,8 @@ class RTree:
 		self.parent=None
 		self.rectangle = []
 		#self.M = (4096-8)/(dimension*8*2)
-                self.M = 3
+                self.M = 10
+                self.m = 5
 		self.childs=[]
 
 	def printRTree(self):
@@ -40,6 +41,41 @@ class RTree:
 				#childDir=chooseChild(node,point)
 				#return chooseLeaf(loadNode(childDir),point)
                                 return node.chooseLeaf(node.childs[0][1],point)
+
+        def calcVolume(self, node, rectangle):
+                #Asumimos por implementacion que rectangle viene en la forma [(min1,...,mind), (max1,...,maxd)]
+                diffs = []
+                result = 1
+                for i in range(node.dim):
+                        diffs[i] = rectangle[1][i]-rectangle[0][i]
+                        result *= diffs[i]
+                return result
+
+        def calcVolumeInefficiency(self, node, rectangle1, rectangle2):
+                mins = [1]*node.dim
+                maxs = [0]*node.dim
+                for i in range(node.dim):
+                        if (rectangle1[0][i] < mins[i]):
+                                mins[i] = rectangle1[0][i]
+                        if (rectangle1[1][i] > maxs[i]):
+                                maxs[i] = rectangle1[1][i]
+                        if (rectangle2[0][i] < mins[i]):
+                                mins[i] = rectangle2[0][i]
+                        if (rectangle2[1][i] > maxs[i]):
+                                maxs[i] = rectangle2[1][i]
+                boundingRectangle = [mins, maxs]
+                return calcVolume(node, boundingRectangle) - calcVolume(node, rectangle1) - calcVolume(node, rectangle2)
+
+        def calcVolumeEnlargement(self, node, targetRectangle, newRectangle):
+                mins = targetRectangle[0]
+                maxs = targetRectangle[1]
+                for i in range(node.dim):
+                        if (newRectangle[0][i] < mins[i]):
+                                mins[i] = newRectangle[0][i]
+                        if (newRectangle[1][i] > maxs[i]):
+                                maxs[i] = newRectangle[1][i]
+                enlargedRectangle = [mins, maxs]
+                return calcVolume(node, enlargedRectangle) - calcVolume(node, targetRectangle)
         
 	def insertar(self,node,point):
 		node.childs.append(((point, point), point))
