@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 class RTree:
 	def __init__(self, dimension):
 		self.dim = dimension
@@ -101,14 +102,28 @@ class RTree:
                 return node.calcVolume(node, boundingRectangle) - node.calcVolume(node, rectangle1) - node.calcVolume(node, rectangle2)
 
         def calcVolumeEnlargement(self, node, targetRectangle, newRectangle):
-                mins = targetRectangle[0]
-                maxs = targetRectangle[1]
                 """print "en calcVolumeEnlargement:"
                 print "targetRectangle:"
                 print targetRectangle
                 print "newRectangle:"
                 print newRectangle"""
+                mins = []
+                maxs = []
+                mins.append(targetRectangle[0][0])
+                mins.append(targetRectangle[0][1])
+                maxs.append(targetRectangle[1][0])
+                maxs.append(targetRectangle[1][1])
+                """print mins
+                print maxs"""
                 for i in range(node.dim):
+                        """print "i:"
+                        print i
+                        print "node.dim:"
+                        print node.dim
+                        print "newRectangle:"
+                        print newRectangle
+                        print "newRectangle[0]:"
+                        print newRectangle[0]"""
                         if (newRectangle[0][i] < mins[i]):
                                 mins[i] = newRectangle[0][i]
                         if (newRectangle[1][i] > maxs[i]):
@@ -116,7 +131,9 @@ class RTree:
                 #print "enlargedRectangle:"
                 enlargedRectangle = [mins, maxs]
                 #print enlargedRectangle
-                return node.calcVolume(node, enlargedRectangle) - node.calcVolume(node, targetRectangle)
+                enlargedRectangleVolume = node.calcVolume(node, enlargedRectangle)
+                targetRectangleVolume = node.calcVolume(node, targetRectangle)
+                return enlargedRectangleVolume - targetRectangleVolume
         
 	def insertar(self,node,point):
                 print point
@@ -135,6 +152,7 @@ class RTree:
 
         def split(self,node):
                 #print "estoy spliteando"
+                children = copy.copy(node.childs)
                 newNode1 = RTree(node.dim)
                 newNode2 = RTree(node.dim)
                 if(node.isLeaf==0):
@@ -154,8 +172,9 @@ class RTree:
                                 newNode2.childs.append(node.childs[i])
                 """
                 rectangle_list = [child[0] for child in node.childs]
-                #print "en split: rectangle_list es..."
-                #print rectangle_list
+                print "en split: rectangle_list es..."
+                print rectangle_list
+                print len(rectangle_list)
                 #non_added_indexes = range(node.childCount)
                 #print "llamando pickSeeds"
                 """print "non_added_indexes inicial:"
@@ -170,13 +189,13 @@ class RTree:
                 """print "non_added_indexes luego de remover seeds[1]:"
                 print non_added_indexes
                 """
-                print "rectangle_list:"
-                print rectangle_list
-                print "rectangle_list[seeds[1]]"
-                print rectangle_list[seeds[1]]
+                """print "rectangle_list:"
+                print rectangle_list"""
+                """print "rectangle_list[seeds[1]]"
+                print rectangle_list[seeds[1]]"""
                 del rectangle_list[seeds[1]]
-                print "rectangle_list luego de remover rectangle_list[seeds[1]]:"
-                print rectangle_list
+                """print "rectangle_list luego de remover rectangle_list[seeds[1]]:"
+                print rectangle_list"""
                 newNode1.childs.append(node.childs[seeds[0]])
                 newNode1.childCount+=1
                 """print "non_added_indexes es:"
@@ -188,8 +207,8 @@ class RTree:
                 print "largo de rectangle_list es:"
                 print len(rectangle_list)"""
                 #non_added_indexes.remove(seeds[0])
-                print "rectangle_list[seeds[0]]"
-                print rectangle_list[seeds[0]]
+                """print "rectangle_list[seeds[0]]"
+                print rectangle_list[seeds[0]]"""
                 del rectangle_list[seeds[0]]
                 print "rectangle_list luego de remover rectangle_list[seeds[0]]:"
                 print rectangle_list
@@ -203,12 +222,12 @@ class RTree:
 
                 newNode1Tom = node.m-newNode1.childCount
                 newNode2Tom = node.m-newNode2.childCount
-                print "newNode1 childs, rectangle:"
+                """print "newNode1 childs, rectangle:"
                 print newNode1.childs
                 print newNode1.rectangle
-                print "newNode2 childs, rectangle:
+                print "newNode2 childs, rectangle:"
                 print newNode2.childs
-                print newNode2.rectangle
+                print newNode2.rectangle"""
                 while rectangle_list:
                         if (not (len(rectangle_list)==newNode1Tom or len(rectangle_list)==newNode2Tom)):
                                 selected_index = node.pickNext(node, rectangle_list, newNode1.rectangle, newNode2.rectangle)
@@ -220,9 +239,14 @@ class RTree:
                                 print "non_added_indexes:"
                                 print non_added_indexes
                                 non_added_indexes.remove(selected_index)"""
+                                print "rectangle_list[selected_index]:"
+                                print rectangle_list[selected_index]
                                 del rectangle_list[selected_index]
+                                print "rectangle_list:"
+                                print rectangle_list
                                 if (newNode1Enlargement < newNode2Enlargement):
-                                        newNode1.childs.append(node.childs[selected_index])
+                                        newNode1.childs.append(children[selected_index])
+                                        del children[selected_index]
                                         newNode1.childCount+=1
                                         newNode1Tom = node.m-newNode1.childCount
                                         if(node.isLeaf==0):
@@ -230,8 +254,9 @@ class RTree:
                                         else:
                                                 node.pointsRectangle(newNode1)
                                 elif (newNode1Enlargement > newNode2Enlargement):
-                                        newNode2.childs.append(node.childs[selected_index])
+                                        newNode2.childs.append(children[selected_index])
                                         newNode2.childCount+=1
+                                        del children[selected_index]
                                         newNode2Tom = node.m-newNode2.childCount
                                         if(node.isLeaf==0):
                                                 node.dirRectangle(newNode2)
@@ -241,7 +266,8 @@ class RTree:
                                         newNode1Volume = node.calcVolume(node, newNode1.rectangle)
                                         newNode2Volume = node.calcVolume(node, newNode2.rectangle)
                                         if(newNode1Volume < newNode2Volume):
-                                                newNode1.childs.append(node.childs[selected_index])
+                                                newNode1.childs.append(children[selected_index])
+                                                del children[selected_index]
                                                 newNode1.childCount+=1
                                                 newNode1Tom = node.m-newNode1.childCount
                                                 if(node.isLeaf==0):
@@ -249,7 +275,8 @@ class RTree:
                                                 else:
                                                         node.pointsRectangle(newNode1)
                                         elif (newNode1Volume > newNode2Volume):
-                                                newNode2.childs.append(node.childs[selected_index])
+                                                newNode2.childs.append(children[selected_index])
+                                                del children[selected_index]
                                                 newNode2.childCount+=1
                                                 newNode2Tom = node.m-newNode2.childCount
                                                 if(node.isLeaf==0):
@@ -258,7 +285,8 @@ class RTree:
                                                         node.pointsRectangle(newNode2)
                                         else:
                                                 if(newNode1.childCount < newNode2.childCount):
-                                                        newNode1.childs.append(node.childs[selected_index])
+                                                        newNode1.childs.append(children[selected_index])
+                                                        del children[selected_index]
                                                         newNode1.childCount+=1
                                                         newNode1Tom = node.m-newNode1.childCount
                                                         if(node.isLeaf==0):
@@ -266,7 +294,8 @@ class RTree:
                                                         else:
                                                                 node.pointsRectangle(newNode1)
                                                 else:
-                                                        newNode2.childs.append(node.childs[selected_index])
+                                                        newNode2.childs.append(children[selected_index])
+                                                        del children[selected_index]
                                                         newNode2.childCount+=1
                                                         newNode2Tom = node.m-newNode2.childCount
                                                         if(node.isLeaf==0):
@@ -274,16 +303,20 @@ class RTree:
                                                         else:
                                                                 node.pointsRectangle(newNode2)
                         elif len(rectangle_list)==newNode1Tom:
-                                newNode1.childs.append(node.childs[0])
+                                newNode1.childs.append(children[0])
+                                del children[0]
                                 newNode1.childCount+=1
+                                del rectangle_list[0]
                                 newNode1Tom = node.m-newNode1.childCount
                                 if(node.isLeaf==0):
                                         node.dirRectangle(newNode1)
                                 else:
                                         node.pointsRectangle(newNode1)
                         else:
-                                newNode2.childs.append(node.childs[0])
+                                newNode2.childs.append(children[0])
+                                del children[0]
                                 newNode2.childCount+=1
+                                del rectangle_list[0]
                                 newNode2Tom = node.m-newNode2.childCount
                                 if(node.isLeaf==0):
                                         node.dirRectangle(newNode2)
@@ -350,25 +383,27 @@ class RTree:
 
         def pickNext(self, node, rectangles, targetRect1, targetRect2):
                 #targetRect1 y 2 son los MBR de los grupos 1 y 2
-                print "Estoy en pickNext. rectangles:"
+                """print "Estoy en pickNext. rectangles:"
                 print rectangles
                 print "targetRect1:"
                 print targetRect1
                 print "targetRect2:"
-                print targetRect2
+                print targetRect2"""
                 diffs = []
                 max_diff = -1.0
                 for rectangle in rectangles:
-                        print "rectangle:"
-                        print rectangle
-                        diff = math.fabs(node.calcVolumeEnlargement(node, targetRect1, rectangle) - node.calcVolumeEnlargement(node, targetRect2, rectangle))
-                        print "diff:"
-                        print diff
+                        """print "rectangle:"
+                        print rectangle"""
+                        targetRect1Enlargement = node.calcVolumeEnlargement(node, targetRect1, rectangle)
+                        targetRect2Enlargement = node.calcVolumeEnlargement(node, targetRect2, rectangle)
+                        diff = math.fabs(targetRect1Enlargement - targetRect2Enlargement)
+                        """print "diff:"
+                        print diff"""
                         diffs.append(diff)
                         if diff > max_diff:
                                 max_diff = diff
-                print "diffs:"
-                print diffs
+                """print "diffs:"
+                print diffs"""
                 return rectangles.index(rectangles[diffs.index(max_diff)])
 
         def calcRectangle(self,node,point):
@@ -394,7 +429,7 @@ class RTree:
                 mins = []
                 maxs = []
                 for i in range(node.childCount):
-                        #print node.childs[i][0]
+                        print node.childs[i][0]
                         mins.append(node.childs[i][0][0])
                         maxs.append(node.childs[i][0][1])
                 #print mins
