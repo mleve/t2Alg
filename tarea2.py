@@ -19,6 +19,13 @@ def loadRTree():
                         
                         rtree.insertar(rtree.chooseLeaf(rtree,vector),vector)
         print rtree.printRTree()
+
+        
+        print "puntos:"
+        print rtree.getPoints(rtree)
+        res = rtree.RangeQuery((0.5,0.5),0.3,rtree)
+        print "resultado RangeQuery (0.5,0.5) radio 0,3)"
+        print res
         """
         vector=[]
         vector.append(0.1234)
