@@ -1,10 +1,12 @@
 import RTree
 import GeneradorDePuntos
 import struct
+import random
 def loadRTree():
-        #generateInputs()
+        generateInputs()
         resultado = open("resultados.csv", 'w')
-        for i in range(2,20):
+        for i in range(2,21):
+                
                 fileName  = "data"+str(i)+"D.bin"
                 with open(fileName,'rb') as f:
                         #Obtener Dimension y numero de vertices
@@ -13,7 +15,7 @@ def loadRTree():
                         points = metadata[1]
                         #Inicializar arbol
                         rtree = RTree.RTree(dimension)
-                        for i in range(points):
+                        for k in range(points):
                         #Obtener proximo punto (vector) a insertar
                                 vector = []
                                 for j in range(dimension):
@@ -24,12 +26,13 @@ def loadRTree():
                 #print rtree.printRTree()
         #print "puntos:"
         #print rtree.getPoints(rtree)
+                print i
                 radio = getRadio(i)
                 testPoints = getConsultPoints(i)
-                resultado.write("Resultados dimension: "+i+" \n")
+                resultado.write("Resultados dimension: "+str(i)+" \n")
                 for point in testPoints:
-                        res = rtree.rangeQuery(point,radio,rtree)
-                        resultado.write(len(res[0]) + ";" + res[1] +" \n")
+                        res = rtree.RangeQuery(point,radio,rtree)
+                        resultado.write(str(len(res[0])) + ";" + str(res[1]) +" \n")
 
         resultado.close()
         """ 
@@ -65,15 +68,15 @@ def getRadio(i):
         return radios[i-2]
 def getConsultPoints(i):
         aux = []
-        for i in range(1000):
+        for j in range(1000):
                 vector = []
-                for i in range(i):
+                for k in range(i):
                         vector.append(random.random())
                 aux.append(vector)
         return aux
                 
 def generateInputs():
-        for i in range(2,20):
+        for i in range(2,21):
                 GeneradorDePuntos.generar(i,100000)
         """
         vector=[]
@@ -104,4 +107,4 @@ def generateInputs():
 
 #GeneradorDePuntos.generar(2, 10)
 loadRTree()
-
+#print getRadio(2)
